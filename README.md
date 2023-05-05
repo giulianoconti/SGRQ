@@ -20,4 +20,4 @@ Cuestionario diseñado para cuantificar el impacto de la enfermedad de las vías
 
 ### Link
 
-https://nofound.com/
+https://expo.dev/accounts/giulian/projects/cuestionario/builds/f80f5968-f650-43d4-aaf1-650c969a0cd6
