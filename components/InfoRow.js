@@ -31,7 +31,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     width: "100%",
   },
-  text1: { color: "rgb(255, 255, 255)", width: "30%" },
+  text1: {
+    color: "rgb(255, 255, 255)",
+    width: "30%",
+  },
   text2Container: {
     color: "rgb(255, 255, 255)",
     textAlign: "center",
