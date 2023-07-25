@@ -9,7 +9,7 @@
 
 ## Cuestionario SGRQ
 
-![WeatherTI](https://raw.githubusercontent.com/giulianoconti/api/main/imagesProjects/extraImgs/CuestionarioSGRQ.png?raw=true)
+![SGRQ](https://raw.githubusercontent.com/giulianoconti/api/main/imagesProjects/extraImgs/CuestionarioSGRQ.png?raw=true)
 
 Cuestionario diseñado para cuantificar el impacto de la enfermedad de las vías aéreas en el estado de salud y el bienestar, percibido por los pacientes respiratorios (EPOC y asma).
 
