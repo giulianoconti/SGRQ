@@ -1,13 +1,5 @@
-import React, { useState } from "react";
-import { SafeAreaView, FlatList, Alert, TextInput, Text, Animated, View, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TitlesQuestionOptions } from "../components/TitlesQuestionOptions";
-import { ButtonNext } from "../components/ButtonNext";
-import { ButtonSimple } from "../components/ButtonSimple";
-
-// síntomas = parte 1      // impacto = parte 2 - sección 2-6      // actividades = parte 2 - sección 3-4-5-7-terminando
-
-const SECTIONS = [
+import type { Section } from "../types/questionnaire";
+export const SECTIONS: Section[] = [
   // parte 1 (síntomas)
   {
     id: 1,
@@ -64,7 +56,8 @@ const SECTIONS = [
       },
       {
         id: 5,
-        question: "Durante el último año, cuántos ataques tuvo por problemas respiratorios que fueran graves o muy desagradables?...",
+        question:
+          "Durante el último año, cuántos ataques tuvo por problemas respiratorios que fueran graves o muy desagradables?...",
         options: [
           { value: 86.7, label: "Más de 3 ataques" },
           { value: 73.5, label: "3 ataques" },
@@ -86,7 +79,8 @@ const SECTIONS = [
       },
       {
         id: 7,
-        question: "Durante el último año, cuántos días buenos (con pocos problemas respiratorios) tuvo en una semana habitual?",
+        question:
+          "Durante el último año, cuántos días buenos (con pocos problemas respiratorios) tuvo en una semana habitual?",
         options: [
           { value: 93.3, label: "Ninguno" },
           { value: 76.6, label: "1 o 2 días" },
@@ -114,7 +108,8 @@ const SECTIONS = [
       {
         id: 9,
         titles: ["Parte 2 - Sección 1"],
-        question: "Cómo diría usted que está de los pulmones? Por favor, marque una sola de las siguientes frases:",
+        question:
+          "Cómo diría usted que está de los pulmones? Por favor, marque una sola de las siguientes frases:",
         options: [
           { value: 83.2, label: "Es el problema más importante que tengo" },
           { value: 82.5, label: "Me causa bastantes problemas" },
@@ -124,7 +119,8 @@ const SECTIONS = [
       },
       {
         id: 10,
-        question: "Si ha tenido algún trabajo remunerado, por favor marque una sola de las siguientes frases:",
+        question:
+          "Si ha tenido algún trabajo remunerado, por favor marque una sola de las siguientes frases:",
         options: [
           {
             value: 88.9,
@@ -132,11 +128,13 @@ const SECTIONS = [
           },
           {
             value: 77.6,
-            label: "Mis problemas respiratorios me dificultan en mi trabajo o me obligaron a cambiar de trabajo",
+            label:
+              "Mis problemas respiratorios me dificultan en mi trabajo o me obligaron a cambiar de trabajo",
           },
           {
             value: 0,
-            label: "Mis problemas respiratorios no me afectan (o no me afectaron) en ningún trabajo",
+            label:
+              "Mis problemas respiratorios no me afectan (o no me afectaron) en ningún trabajo",
           },
         ],
       },
@@ -272,7 +270,8 @@ const SECTIONS = [
       },
       {
         id: 25,
-        question: "Mis problemas respiratorios son una molestia para mi familia, mis amigos o mis vecinos",
+        question:
+          "Mis problemas respiratorios son una molestia para mi familia, mis amigos o mis vecinos",
         options: [
           { value: 79.1, label: "Si" },
           { value: 0, label: "No" },
@@ -304,7 +303,8 @@ const SECTIONS = [
       },
       {
         id: 29,
-        question: "Por causa de mis problemas respiratorios me he convertido en una persona insegura o inválida",
+        question:
+          "Por causa de mis problemas respiratorios me he convertido en una persona insegura o inválida",
         options: [
           { value: 89.9, label: "Si" },
           { value: 0, label: "No" },
@@ -399,7 +399,8 @@ const SECTIONS = [
       },
       {
         id: 39,
-        question: "Tardo mucho para hacer trabajos como las tareas domésticas o, tengo que parar a descansar",
+        question:
+          "Tardo mucho para hacer trabajos como las tareas domésticas o, tengo que parar a descansar",
         options: [
           { value: 70.6, label: "Si" },
           { value: 0, label: "No" },
@@ -531,173 +532,3 @@ const SECTIONS = [
     ],
   },
 ];
-
-const QuestionnaireScreen = ({ navigation, route }) => {
-  const { SECTIONArrayNumber, selectedAnswers } = route.params;
-  const section = SECTIONS[SECTIONArrayNumber];
-  const isTheLastSection = SECTIONArrayNumber === SECTIONS.length - 1;
-  const [answers, setAnswers] = useState([...selectedAnswers] || Array(section.questions.length).fill(404));
-  const [fullNameAndId, setFullNameAndId] = useState("");
-
-  const handleSelect = (questionId, value) => {
-    const newAnswers = [...answers];
-    newAnswers[questionId - 1] = value;
-    setAnswers(newAnswers);
-  };
-
-  const handleNextSection = async () => {
-    if (answers.includes(404)) {
-      Alert.alert("Tienes que responder todas las preguntas para continuar");
-    } else if (isTheLastSection) {
-      if (fullNameAndId.length > 6) {
-        const QuestionnaireDate = new Date().toLocaleDateString();
-        const [sintomas, actividades, impacto, total] = [
-          plusArray(answers.slice(0, 8)),
-          plusArray([...answers.slice(10, 17), ...answers.slice(35, 44)]),
-          plusArray([...answers.slice(8, 10), ...answers.slice(17, 35), ...answers.slice(44, 50)]),
-          plusArray(answers),
-        ];
-
-        const data = {
-          fullNameAndId,
-          QuestionnaireDate,
-          sintomas,
-          sintomasPercentage: (sintomas * 100) / 662.5,
-          actividades,
-          actividadesPercentage: (actividades * 100) / 1209.1,
-          impacto,
-          impactoPercentage: (impacto * 100) / 2117.8,
-          total,
-          totalPercentage: (total * 100) / 3989.2,
-        };
-
-        try {
-          const value = await AsyncStorage.getItem("results");
-          let results = [];
-          if (value) {
-            results = JSON.parse(value);
-          }
-          results.unshift(data);
-          await AsyncStorage.setItem("results", JSON.stringify(results));
-          navigation.navigate("Home");
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        Alert.alert("Tienes que introducir tu nombre, apellido y DNI para continuar");
-      }
-    } else {
-      const nextSectionQuestions = Array(SECTIONS[SECTIONArrayNumber + 1].questions.length).fill(404);
-      const selectedAnswers = [...answers, ...nextSectionQuestions];
-      navigation.push("Questionnaire", {
-        SECTIONArrayNumber: SECTIONArrayNumber + 1,
-        selectedAnswers,
-      });
-    }
-  };
-
-  const plusArray = (array) => array.reduce((a, b) => a + b, 0);
-
-  const renderTitlesQuestionOptions = ({ item: question }) => (
-    <TitlesQuestionOptions
-      key={question.id}
-      titles={question?.titles}
-      question={question.question}
-      options={question.options}
-      onSelect={(value) => handleSelect(question.id, value)}
-    />
-  );
-
-  const [position] = useState(new Animated.Value(0));
-
-  const animatePositionFocus = () => {
-    Animated.timing(position, {
-      toValue: -320,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const animatePositionBlur = () => {
-    Animated.timing(position, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  return (
-    <SafeAreaView style={styles.backgroundPage}>
-      <Animated.View style={Platform.OS === "ios" && { transform: [{ translateY: position }] }}>
-        <FlatList
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-          data={section.questions}
-          keyExtractor={(item) => item.id.toString()}
-          removeClippedSubviews={false}
-          renderItem={renderTitlesQuestionOptions}
-          ListFooterComponent={
-            isTheLastSection ? (
-              <>
-                <View style={styles.containerPink}>
-                  <Text style={styles.textInContainerPink}>
-                    Introduzca su nombre, apellido y DNI en el siguiente campo para poder identificar sus resultados.
-                  </Text>
-                </View>
-
-                <TextInput
-                  multiline={true}
-                  numberOfLines={null}
-                  onBlur={animatePositionBlur}
-                  onChangeText={(text) => setFullNameAndId(text)}
-                  onFocus={animatePositionFocus}
-                  placeholder="Escriba su nombre, apellido y DNI."
-                  placeholderTextColor={"rgb(100, 100, 100)"}
-                  style={styles.input}
-                  value={fullNameAndId}
-                />
-
-                <ButtonSimple
-                  onPress={handleNextSection}
-                  text="Terminar"
-                />
-              </>
-            ) : (
-              <ButtonNext onPress={handleNextSection} />
-            )
-          }
-        />
-      </Animated.View>
-    </SafeAreaView>
-  );
-};
-
-export default QuestionnaireScreen;
-
-const styles = StyleSheet.create({
-  backgroundPage: {
-    backgroundColor: "rgb(40, 80, 125)",
-  },
-  containerPink: {
-    backgroundColor: "rgb(200, 0, 150)",
-    borderRadius: 8,
-    marginVertical: 8,
-    padding: 8,
-  },
-  textInContainerPink: {
-    color: "rgb(255, 255, 255)",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  input: {
-    backgroundColor: "rgb(255, 255, 255)",
-    color: "rgb(0, 0, 0)",
-    borderRadius: 8,
-    marginTop: 8,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    fontSize: 16,
-    minHeight: 88,
-    textAlignVertical: "top",
-  },
-});

@@ -1,21 +1,36 @@
-import { useRef, useState } from "react";
-import { Animated, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import React, { memo, useState, useRef, useCallback } from "react";
+import { Animated, StyleSheet, Text, TouchableOpacity, Pressable, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { PercentageItem } from "./PercentageItem";
 import { InfoRow } from "./InfoRow";
+import { colors } from "../constants/theme";
+import type { StoredResult } from "../types/result";
 
-export const ResultBox = ({ result, handleDeleteResult }) => {
+const DETAIL_HEIGHT = 216;
+
+interface ResultBoxProps {
+  result: StoredResult;
+  onDelete: (fullNameAndId: string) => void;
+}
+
+export const ResultBox = memo(function ResultBox({ result, onDelete }: ResultBoxProps) {
   const [isVisible, setIsVisible] = useState(false);
   const height = useRef(new Animated.Value(0)).current;
 
-  const toggleVisibility = () => {
-    setIsVisible(!isVisible);
-    Animated.timing(height, {
-      toValue: isVisible ? 0 : 216,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
+  const toggleVisibility = useCallback(() => {
+    setIsVisible((prev) => {
+      Animated.timing(height, {
+        toValue: prev ? 0 : DETAIL_HEIGHT,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+      return !prev;
+    });
+  }, [height]);
+
+  const handleDelete = useCallback(() => {
+    onDelete(result.fullNameAndId);
+  }, [onDelete, result.fullNameAndId]);
 
   return (
     <View style={styles.container}>
@@ -23,33 +38,20 @@ export const ResultBox = ({ result, handleDeleteResult }) => {
         <Text style={styles.textDate}>{result.QuestionnaireDate}</Text>
         <Text style={styles.textFullName}>{result.fullNameAndId}</Text>
         <View style={styles.containerDelete}>
-          <TouchableWithoutFeedback onPress={() => handleDeleteResult(result.fullNameAndId)}>
-            <AntDesign
-              color="rgb(255, 255, 255)"
-              name="delete"
-              size={20}
-            />
-          </TouchableWithoutFeedback>
+          <Pressable onPress={handleDelete}>
+            <AntDesign color={colors.white} name="delete" size={20} />
+          </Pressable>
         </View>
       </View>
-      <View style={styles.p_8}>
-        <View style={styles.flex_col}>
-          <PercentageItem
-            title="SÍNTOMAS"
-            percentage={result.sintomasPercentage.toFixed(0)}
-          />
+      <View style={styles.p8}>
+        <View style={styles.flexCol}>
+          <PercentageItem title="SÍNTOMAS" percentage={result.sintomasPercentage.toFixed(0)} />
           <PercentageItem
             title="ACTIVIDADES"
             percentage={result.actividadesPercentage.toFixed(0)}
           />
-          <PercentageItem
-            title="IMPACTO"
-            percentage={result.impactoPercentage.toFixed(0)}
-          />
-          <PercentageItem
-            title="TOTAL"
-            percentage={result.totalPercentage.toFixed(0)}
-          />
+          <PercentageItem title="IMPACTO" percentage={result.impactoPercentage.toFixed(0)} />
+          <PercentageItem title="TOTAL" percentage={result.totalPercentage.toFixed(0)} />
         </View>
       </View>
       <TouchableOpacity onPress={toggleVisibility}>
@@ -61,10 +63,7 @@ export const ResultBox = ({ result, handleDeleteResult }) => {
       </TouchableOpacity>
       <View style={styles.extraInfoContainer}>
         <Animated.View style={{ height, justifyContent: "space-between" }}>
-          <InfoRow
-            label="- FECHA:"
-            value={result.QuestionnaireDate}
-          />
+          <InfoRow label="- FECHA:" value={result.QuestionnaireDate} />
           <InfoRow
             label="- PACIENTE:"
             value={result.fullNameAndId}
@@ -98,11 +97,11 @@ export const ResultBox = ({ result, handleDeleteResult }) => {
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "rgb(50, 110, 210)",
+    backgroundColor: colors.header,
     borderRadius: 8,
     marginTop: 16,
   },
@@ -111,12 +110,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   textDate: {
-    color: "rgb(255, 255, 255)",
+    color: colors.white,
     fontSize: 16,
     marginLeft: 4,
   },
   textFullName: {
-    color: "rgb(255, 255, 255)",
+    color: colors.white,
     flex: 1,
     flexWrap: "wrap",
     fontSize: 16,
@@ -125,16 +124,16 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   containerDelete: {
-    backgroundColor: "rgb(255, 0 ,0)",
+    backgroundColor: colors.red,
     borderBottomLeftRadius: 8,
     borderTopRightRadius: 8,
     height: 26,
     padding: 2,
   },
-  p_8: {
+  p8: {
     padding: 8,
   },
-  flex_col: {
+  flexCol: {
     flexDirection: "column",
   },
   touchableContainer: {
@@ -142,9 +141,9 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   touchableText: {
-    borderColor: "rgb(255, 255, 255)",
+    borderColor: colors.white,
     borderWidth: 1,
-    color: "rgb(255, 255, 255)",
+    color: colors.white,
     fontSize: 16,
     paddingHorizontal: 8,
     paddingVertical: 4,
